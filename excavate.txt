@@ -1,0 +1,122 @@
+function digY()
+  depth = 0
+  turtle.digDown()
+  while turtle.down() do
+    depth = depth + 1
+    turtle.digDown()
+  end
+  print("Bedrock at depth = " .. depth)
+  while depth > 0 do
+    turtle.digUp()
+    turtle.up()
+    depth = depth - 1
+  end
+end
+
+function dropAll()
+  for i = 1, 16, 1 do
+    turtle.select(i)
+    turtle.drop()
+  end
+end
+
+function refuelAll()
+  for i = 1, 16, 1 do
+    turtle.select(i)
+    turtle.refuel()
+  end
+end
+
+function refuel_to_level(fuel_level)
+  old_fuel_level = turtle.getFuelLevel()
+  current_fuel_level = old_fuel_level
+  for i = 1, 16, 1 do
+    turtle.select(i)
+    while turtle.refuel(1) and (current_fuel_level < fuel_level) do
+      current_fuel_level = turtle.getFuelLevel()
+      print("Refueling with " .. (current_fuel_level - old_fuel_level) ..
+        " units")
+      print("current fuel level " .. current_fuel_level .. " units")
+      old_fuel_level = current_fuel_level
+    end
+    if current_fuel_level >= fuel_level then
+      print("Target fuel level: " .. fuel_level)
+      print("Current fuel level: " .. current_fuel_level)
+        return
+    end
+  end
+  print("Could not reach target fuel level" .. fuel_level)
+  print("  add more fuel to continue")
+end
+
+function dumpTheGoods(x_in, y_in)
+  y = 0
+  x = 0
+  if(x_in > 0) then
+    turtle.turnRight()
+  end
+  while x < x_in do
+    turtle.dig()
+    turtle.forward()
+    x = x + 1
+  end
+  if(x_in > 0) then
+    turtle.turnLeft()
+  end
+  while y < y_in do
+    turtle.dig()
+    turtle.forward()
+    y = y + 1
+  end
+  dropAll()
+  turtle.turnLeft()
+  turtle.turnLeft()
+end
+
+function goToDigSite(x_in, y_in)
+  y = 0
+  while y < y_in do
+    turtle.dig()
+    turtle.forward()
+    y = y + 1
+  end
+  turtle.turnRight()
+  x = 0
+  while x < x_in do
+    turtle.dig()
+    turtle.forward()
+    x = x + 1
+  end
+  turtle.turnRight()
+end
+
+local Args = { ... }
+
+x_in = tonumber(Args[2])
+y_in = tonumber(Args[1])
+
+if x_in < 1 then
+ print("x value out of scope")
+ return false
+end
+if y_in < 1 then
+ print("y value out of scope")
+ return false
+end
+
+refuelAll()
+
+-- here we should make sure we have enough fuel for the operation!
+
+x = 0
+while x < x_in do
+  y = 0
+  while y < y_in do
+    goToDigSite(x, y)
+    digY()
+    dumpTheGoods(x, y)
+    y = y + 1
+  end
+  x = x + 1
+end
+print("DONE!!")
